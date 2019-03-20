@@ -25,7 +25,7 @@ def main(indir, maxheight):
                 im.resize((w,h), Image.ANTIALIAS).save(image_filename +
                                                        '_small.jpeg', 'JPEG',
                                                        quality=65)
-                os.remove(image_file)
+                #os.remove(image_file)
         except:
             print('{} is not a valid image file.'.format(image_file))
         
