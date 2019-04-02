@@ -12,18 +12,19 @@ def scandir(dir):
             filelist.append(os.path.join(path, f))
     return filelist
 
-def main(indir, maxheight):
+def main(indir, maxheight, output_dir = None):
     image_files = scandir(indir)
     for image_file in image_files:
         (image_filename, image_ext) = os.path.splitext(image_file)
+        (basename, ext) = os.path.splitext(os.path.basename(image_file))
+        outpath = os.path.join(output_dir, basename, '_small.jpg')
         try:
             im = Image.open(image_file)
             if im.height > maxheight:
                 ratio = maxheight / im.height
                 w = int(im.width * ratio)
                 h = int(im.height * ratio)
-                im.resize((w,h), Image.ANTIALIAS).save(image_filename +
-                                                       '_small.jpeg', 'JPEG',
+                im.resize((w,h), Image.ANTIALIAS).save(outpath, 'JPEG',
                                                        quality=65)
                 #os.remove(image_file)
         except:
@@ -35,9 +36,12 @@ if __name__ == "__main__":
     parser.add_argument("input_dir", help = "Input directory of tile files")
     parser.add_argument("-mh", "--maxheight",
                         help = "New maximum height of image")
+    parser.add_argument("-od", "--output_dir",
+                        help = "Output directory")
     args = parser.parse_args()
     
     input_dir = args.input_dir
+    output_dir = args.output_dir
     maxheight = args.maxheight if args.maxheight else 1080
     
-    main(input_dir, maxheight)
+    main(input_dir, maxheight, output_dir)
