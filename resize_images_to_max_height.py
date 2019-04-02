@@ -16,8 +16,9 @@ def main(indir, maxheight, output_dir = None):
     image_files = scandir(indir)
     for image_file in image_files:
         (image_filename, image_ext) = os.path.splitext(image_file)
-        (basename, ext) = os.path.splitext(os.path.basename(image_file))
-        outpath = os.path.join(output_dir, basename, '_small.jpg')
+        basename = os.path.basename(image_file)
+        outpath = os.path.join(output_dir, basename)
+        print(outpath)
         try:
             im = Image.open(image_file)
             if im.height > maxheight:
