@@ -23,3 +23,6 @@ for i in Imagery/*.mbtiles; do
     echo $i
     gdaladdo -r average $i 2 4 8 16 32 64 128 256 512 1024 &
 done
+
+# In case reprojection needed:
+# gdalwarp -t_srs EPSG:3857 infile.tif outfile_3857.tif
