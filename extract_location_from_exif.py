@@ -62,7 +62,7 @@ def create_geotag_list(indir):
     """Create a CSV file with a list of photos and their lat & long"""
     outfile = indir + '.csv'
     image_files = scandir(indir)
-    writer = csv.writer(open(outfile, 'w'), delimiter = ';')
+    writer = csv.writer(open(outfile, 'w'), delimiter = ',')
     writer.writerow(['file', 'path', 'lat', 'lon'])
     
     for image_file in image_files:

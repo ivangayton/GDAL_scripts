@@ -15,8 +15,11 @@ def scandir(dir):
 def main(indir, maxheight, output_dir = None):
     image_files = scandir(indir)
     for image_file in image_files:
+        print(image_file)
         (image_filename, image_ext) = os.path.splitext(image_file)
         basename = os.path.basename(image_file)
+        print(output_dir)
+        print(basename)
         outpath = os.path.join(output_dir, basename)
         print(outpath)
         try:
