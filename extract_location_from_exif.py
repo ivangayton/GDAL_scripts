@@ -44,20 +44,25 @@ def exif_GPS_to_decimal_degrees(intag):
 def extract_location(infile):
     """Return the GPS lat and long of a photo from EXIF in decimal degrees"""
     with open(infile, 'rb') as f:
-        tags = exifread.process_file(f)
-        lattag = tags.get('GPS GPSLatitude')
-        latref = tags.get('GPS GPSLatitudeRef')
-        lontag = tags.get('GPS GPSLongitude')
-        lonref = tags.get('GPS GPSLongitudeRef')
-
-        lat = exif_GPS_to_decimal_degrees(lattag)
-        lon = exif_GPS_to_decimal_degrees(lontag)
-        if latref.values == 'S':
-            lat = -lat
-        if lonref.values == 'W':
-            lon = -lon
-        return(lat, lon)
-
+        try:
+            tags = exifread.process_file(f)
+            lattag = tags.get('GPS GPSLatitude')
+            latref = tags.get('GPS GPSLatitudeRef')
+            lontag = tags.get('GPS GPSLongitude')
+            lonref = tags.get('GPS GPSLongitudeRef')
+    
+            lat = exif_GPS_to_decimal_degrees(lattag)
+            lon = exif_GPS_to_decimal_degrees(lontag)
+            if latref.values == 'S':
+                lat = -lat
+            if lonref.values == 'W':
+                lon = -lon
+            return(lat, lon)
+        except Exception as e:
+            print(e)
+            print('The photo {} failed for some reason'.format(infile))
+        
+    
 def create_geotag_list(indir):
     """Create a CSV file with a list of photos and their lat & long"""
     outfile = indir + '.csv'
@@ -69,8 +74,9 @@ def create_geotag_list(indir):
         (image_path, image_ext) = os.path.splitext(image_file)
         image_filename = os.path.basename(image_file)
         if(image_ext == '.JPG' or image_ext == '.jpg'):
-            coords = extract_location(image_file)
-            writer.writerow([image_filename, image_file, coords[0], coords[1]]) 
+            crds = extract_location(image_file)
+            if(crds):
+                writer.writerow([image_filename, image_file, crds[0], crds[1]]) 
     
     
 if __name__ == "__main__":
