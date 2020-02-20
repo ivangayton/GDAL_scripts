@@ -68,15 +68,17 @@ def create_geotag_list(indir):
     outfile = indir + '.csv'
     image_files = scandir(indir)
     writer = csv.writer(open(outfile, 'w'), delimiter = ',')
-    writer.writerow(['file', 'path', 'lat', 'lon'])
+    writer.writerow(['file', 'path', 'directory', 'lat', 'lon'])
     
     for image_file in image_files:
         (image_path, image_ext) = os.path.splitext(image_file)
         image_filename = os.path.basename(image_file)
+        image_dirname = os.path.dirname(image_file)
         if(image_ext == '.JPG' or image_ext == '.jpg'):
             crds = extract_location(image_file)
             if(crds):
-                writer.writerow([image_filename, image_file, crds[0], crds[1]]) 
+                writer.writerow([image_filename, image_file, image_dirname,
+                                 crds[0], crds[1]]) 
     
     
 if __name__ == "__main__":
