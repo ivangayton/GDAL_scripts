@@ -3,7 +3,7 @@
 ODM can't always be effectively set up locally, so a cloud machine can sometimes be the answer. Bandwidth is a problem. It can't be solved, but the following method does a reasonable job of reducing the bandwidth needed to process image datasets on the cloud from African locations.
 
 # Steps - Overview
-- Create a Digital Ocean droplet with at least 4GB of RAM (less than that and the install will fail---you can downsize it between runs to the second-cheapest droplet)
+- Create a Digital Ocean droplet with at least 4GB of RAM (less than that and the install will fail&mdash;you can downsize it between runs to the second-cheapest droplet)
   - Should be an Ubuntu 16.04 instance to ensure dependency compatibility
 - Download and install ODM on it from the ODM Github (regular, not WebODM)
 
@@ -21,7 +21,8 @@ export PYTHONPATH=$PYTHONPATH:/your/path/OpenDroneMap/SuperBuild/src/opensfm
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/your/path/OpenDroneMap/SuperBuild/install/lib
 ```
 
-- Meanwhile (you can do this while ODM installs), push your images onto the server
+-Now you'll need a hard drive (Volume in Digital Ocean jargon) big enough to manage your project. Rule of thumb seems to be 10 times the size of your raw image set. Set up the volume, attach it to your droplet, and configure its mount point (in this example setting it to /mnt/odmdata/).  
+- Now push your images onto the server
   - This will take some bandwidth. No way around that.
     - That's not quite true (that there's no way around it). If you compress the images into  JPEG with YCbCr instead of RGB, this retains essentially all of the feature detail in the luminance channel (Y) and compresses the chrominance channels (Cb and Cr) which shouldn't reall affect the quality of the ODM output (ODM only uses a single band to generate the point cloud anyway; in fact it's possible that it will increase the quality of the point cloud matching because the luminance channel will probably have more contrast than any of the RGB channels) and will get you a substantial reduction in file size. But honestly, you only want to mess with this if you're desperate to save bandwidth.
 
