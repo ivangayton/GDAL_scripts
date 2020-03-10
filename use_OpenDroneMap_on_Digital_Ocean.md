@@ -47,7 +47,8 @@ nohup python run.py projectname --split 1 --split-overlap 0 --ignore-gsd --depth
 
   - Note that this assumes you have an image_groups.txt file. If not, this ```-split-overlap 0``` will probably fuck things up, and the ```--split 1``` is literally a random number that will be ignored after the image_groups.txt file is loaded (I think it normally controls how many groups it splits a set of images into, but in our case we're assuming the images are already grouped sensibly).
   - Speaking of grouping images sensibly, if you have the images in separate folders for individual AOI blocks or flights (which you will if your flight management was organized), you can create an image_groups.txt file with the incantations ```for i in *; do cd $i; for j in *; do echo "$j $i" >> ../$i.txt; done; cd ../; done;``` and ```for i in myDirectory/*.txt; do cat $i >> image_groups.txt; done;```. Then move all of the image files into a single directory called images in the project root dir.
-
+    - ##TODO explain the structure of image_groups.txt
+  - This also assumes you have a gcp_list.txt file. ##TODO explain the structure of that file, and maybe explain the process Iddy and I used to create it.
 - Follow the progress using tail (so that you'll know when it's done)
 
 ```
