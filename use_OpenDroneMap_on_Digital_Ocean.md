@@ -3,16 +3,18 @@
 ODM can't always be effectively set up locally, so a cloud machine can sometimes be the answer. Bandwidth is a problem. It can't be solved, but the following method does a reasonable job of reducing the bandwidth needed to process image datasets on the cloud from African locations.
 
 # Steps - Overview
-- Create a Digital Ocean droplet of minimal size/cost
+- Create a Digital Ocean droplet with at least 4GB of RAM (less than that and the install will fail---you can downsize it between runs to the second-cheapest droplet)
   - Should be an Ubuntu 16.04 instance to ensure dependency compatibility
 - Download and install ODM on it from the ODM Github (regular, not WebODM)
-  - This requires upsizing the droplet to at least 4GB of RAM. Then pull from GitHub and perform the native install.
-  ```
+
+```
 git pull https://github.com/OpenDroneMap/ODM.git
 cd ODM
 bash configure.sh install
 ```
-    -  (From [the ODM github](https://github.com/OpenDroneMap/ODM)) There are some environmental variables that need to be set. Open the ~/.bashrc file on your machine and add the following 3 lines at the end. The file can be opened with ```nano ~/.bashrc```. Be sure to replace the "/your/path/" with the correct path to the location where you extracted OpenDroneMap:
+
+-  (From [the ODM github](https://github.com/OpenDroneMap/ODM)) There are some environmental variables that need to be set. Open the ~/.bashrc file on your machine and add the following 3 lines at the end. The file can be opened with ```nano ~/.bashrc```. Be sure to replace the "/your/path/" with the correct path to the location where you extracted OpenDroneMap:
+
 ```
 export PYTHONPATH=$PYTHONPATH:/your/path/OpenDroneMap/SuperBuild/install/lib/python2.7/dist-packages
 export PYTHONPATH=$PYTHONPATH:/your/path/OpenDroneMap/SuperBuild/src/opensfm
