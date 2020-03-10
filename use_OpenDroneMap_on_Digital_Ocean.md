@@ -13,7 +13,7 @@ cd ODM
 bash configure.sh install
 ```
 
--  (From [the ODM github](https://github.com/OpenDroneMap/ODM)) There are some environmental variables that need to be set. Open the ~/.bashrc file on your machine and add the following 3 lines at the end. The file can be opened with ```nano ~/.bashrc```. Be sure to replace the "/your/path/" with the correct path to the location where you extracted OpenDroneMap:
+- (From [the ODM github](https://github.com/OpenDroneMap/ODM)) There are some environmental variables that need to be set. Open the ~/.bashrc file on your machine and add the following 3 lines at the end. The file can be opened with ```nano ~/.bashrc```. Be sure to replace the "/your/path/" with the correct path to the location where you extracted OpenDroneMap:
 
 ```
 export PYTHONPATH=$PYTHONPATH:/your/path/OpenDroneMap/SuperBuild/install/lib/python2.7/dist-packages
@@ -21,19 +21,19 @@ export PYTHONPATH=$PYTHONPATH:/your/path/OpenDroneMap/SuperBuild/src/opensfm
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/your/path/OpenDroneMap/SuperBuild/install/lib
 ```
 
--Now you'll need a hard drive (Volume in Digital Ocean jargon) big enough to manage your project. Rule of thumb seems to be 10 times the size of your raw image set. Set up the volume, attach it to your droplet, and configure its mount point (in this example setting it to /mnt/odmdata/).  
+- Now you'll need a hard drive (Volume in Digital Ocean jargon) big enough to manage your project. Rule of thumb seems to be 10 times the size of your raw image set. Set up the volume, attach it to your droplet, and configure its mount point (in this example setting it to /mnt/odmdata/).  
 - Now push your images onto the server
   - This will take some bandwidth. No way around that.
     - That's not quite true (that there's no way around it). If you compress the images into  JPEG with YCbCr instead of RGB, this retains essentially all of the feature detail in the luminance channel (Y) and compresses the chrominance channels (Cb and Cr) which shouldn't reall affect the quality of the ODM output (ODM only uses a single band to generate the point cloud anyway; in fact it's possible that it will increase the quality of the point cloud matching because the luminance channel will probably have more contrast than any of the RGB channels) and will get you a substantial reduction in file size. But honestly, you only want to mess with this if you're desperate to save bandwidth.
 
 - Folder structure should be:
-  - ```/path/to/project/root/``` This is what goes in the project path line of the settings.yaml file. It contains the gcp_list.txt file, the image_groups.txt file, and the images folder.
-  - ```/path/to/project/root/images/``` This contains all of the images. If you set it up like this, the images don't get re-copied because they're already in the directory that ODM wants them in. 
+  - One project folder on your second drive (volume). This is what goes in the project path line of the settings.yaml file. It contains the gcp_list.txt file, the image_groups.txt file, and the images folder. In this example I'm using ```/mnt/odmdata/myproject/```
+  - ```/mnt/odmdata/myproject/images/``` This contains all of the images. If you set it up like this, the images don't get re-copied because they're already in the directory that ODM wants them in. 
 - If you've got images with GPS info on them (as from an Ebee), use exiftool to massage the GPS information ```exiftool "-GPSDOP<GPSZAccuracy" .```
   - This takes the Z error estimate that the ebee sets and copies that tag to the DOP tag, where OpenDroneMap will read it and use it to constrain the SfM modeling process (i.e. : optimize this model, but don’t move the cameras further than the dilution off precision estimate, instead modify other aspects of camera pose and lens parameters).
   - Yes, you'll probably have to install exiftool. The command might be ```sudo apt install libimage-exiftool-perl```.
 
-- Modify settings.yaml to specify the project folder i.e. ```/mnt/odmdrive/myproject/```. Make sure the images are in the correct spot, i.e. ```/mnt/odmdrive/myproject/images``` and the other ancillary files (gcp_list.txt and image_groups.txt) are in the root folder.
+- Modify settings.yaml to specify the project folder i.e. ```/mnt/odmdata/myproject/```. Make sure the images are in the correct spot, i.e. ```/mnt/odmdata/myproject/images``` and the other ancillary files (gcp_list.txt and image_groups.txt) are in the root folder ```/mnt/odmdata/myproject/```
 
 - Shut down and resize your machine to an appropriately monstrous number of CPUs and amount of memory. Restart, and get to work quickly so as not to waste expensive big-droplet time.
 - Launch the ODM process via ssh using nohup (so that if you're cut off, processing will continue)
@@ -46,15 +46,16 @@ nohup python run.py projectname --split 1 --split-overlap 0 --ignore-gsd --depth
 ```
 
   - Note that this assumes you have an image_groups.txt file. If not, this ```-split-overlap 0``` will probably fuck things up, and the ```--split 1``` is literally a random number that will be ignored after the image_groups.txt file is loaded (I think it normally controls how many groups it splits a set of images into, but in our case we're assuming the images are already grouped sensibly).
-  - Speaking of grouping images sensibly, if you have the imagesin separate folders for individual AOI blocks or flights (which you will if your flight management was organized), you can create an image_groups.txt file with the incantations ```for i in *; do cd $i; for j in *; do echo "$j $i" >> ../$i.txt; done; cd ../; done;``` and ```for i in myDirectory/*.txt; do cat $i >> image_groups.txt; done;```. Then move all of the image files into a single directory called images in the project root dir.
+  - Speaking of grouping images sensibly, if you have the images in separate folders for individual AOI blocks or flights (which you will if your flight management was organized), you can create an image_groups.txt file with the incantations ```for i in *; do cd $i; for j in *; do echo "$j $i" >> ../$i.txt; done; cd ../; done;``` and ```for i in myDirectory/*.txt; do cat $i >> image_groups.txt; done;```. Then move all of the image files into a single directory called images in the project root dir.
 
 - Follow the progress using tail (so that you'll know when it's done)
+
 ```
 tail -f nohup.out
 ```
 
 - You may want to keep an eye on htop (to get a sense of the resource usage so that in future you can only spin up a machine as large as necessary)
-- As soon as processing is done, shut down the machine and resize it back down to the original, inexpensive minimum.
+- As soon as processing is done, shut down the machine and resize it back down to the inexpensive minimum capacity.
 - Start the machine back up, and log in via ssh.
 - Compress the orthophoto using GDAL. Don't add overviews, do that on your local machine to avoid making the file bigger before downloading it.
 ```
