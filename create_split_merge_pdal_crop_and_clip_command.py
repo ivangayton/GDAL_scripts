@@ -38,6 +38,11 @@ often (depending how many you want to run concurrently; I'm doing 4 at a time).
 When I get around to it, I'll automate that in this script, unless I (or 
 someone else) gets around to adding something like this to the PDAL overlays
 filter!
+
+Then you can rasterize the resulting point cloud, which is full of holes, and
+use a Fill nodata agorithm to fill it in. You might want to do some cleaning
+before then, as if there are little building edges in the point cloud a naive
+Fill nodata agorithm spans the holes from the raised edges.
 """
 import sys, os
 import csv
