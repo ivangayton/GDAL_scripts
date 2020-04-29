@@ -31,3 +31,7 @@ gdal_translate -co COMPRESS=JPEG -co PHOTOMETRIC=YCBCR -co TILED=YES -b 1 -b 2 -
 # and
 
 gdaladdo -r average --config BIGTIFF_OVERVIEW=IF_SAFER INFILE.tif 2 4 8 16 32 64 128 256 512 1024
+
+# Single-band rasters with data like elevation:
+
+gdal_translate -co COMPRESS=LZW infile.tif outfile.tif
