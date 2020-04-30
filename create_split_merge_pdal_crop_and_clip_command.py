@@ -47,13 +47,19 @@ Fill nodata agorithm spans the holes from the raised edges.
 import sys, os
 import csv
 
-
-def prep(lasfile, csvfile, outfile):
+def create_pdal_commands(lasfile, csvfile):
     print(f'Creating command from {csvfile}')
     tiles = list(csv.reader(open(csvfile)))
     header = tiles.pop(0)
     print(f'{csvfile} contains {len(tiles)} chunks')
-    outlines = []
+    commands = []
+    classifiedlasfile = lasfile
+
+    if True: # TODO: flag if you want to pre-classify your point cloud
+        (laspath, lasext) = os.path.splitext(lasfile)
+        classifiedlasfile = f'{laspath}_classified_and_clipped{lasext}'
+        commands.append('echo "Classifying point cloud using Simple Morphological Filter"')
+        commands.append(f'pdal translate {lasfile} -o {classifiedlasfile} outlier smrf range --filters.outlier.method="statistical" --filters.outlier.mean_k=8 --filters.outlier.multiplier=3.0 --filters.smrf.ignore="Classification[7:7]" --filters.range.limits="Classification[2:2]" --writers.las.compression=true --verbose 4')
     
     for tile in tiles:
         tilenum = tile[0]
@@ -64,19 +70,21 @@ def prep(lasfile, csvfile, outfile):
         ymax = tile[2]
         xmax = tile[3]
         ymin = tile[4]
-        crop_command = f'pdal translate {lasfile} -o {croppedfile} crop --filters.crop.bounds="([{xmin},{xmax}],[{ymin},{ymax}])" --writers.las.compression=true --verbose 4'
-        clip_command = f'pdal translate {croppedfile} -o {clippedfile} overlay range --filters.overlay.datasource={maskfile} --filters.overlay.column="CLS" --filters.overlay.dimension="Classification" --filters.range.limits="Classification[2:2]" --verbose 4'
-        outlines.append([crop_command, clip_command, tilenum])
+        commands.append(f'echo Cropping and clipping tile {tilenum}.')
+        commands.append(f'pdal translate {classifiedlasfile} -o {croppedfile} crop --filters.crop.bounds="([{xmin},{xmax}],[{ymin},{ymax}])" --writers.las.compression=true --verbose 4')
+        commands.append(f'pdal translate {croppedfile} -o {clippedfile} overlay range --filters.overlay.datasource={maskfile} --filters.overlay.column="CLS" --filters.overlay.dimension="Classification" --filters.range.limits="Classification[2:2]" --verbose 4')
 
+    return commands
+
+def write_bash_script(commands, outfile):
     with open(outfile, 'w') as of:
         of.write('#!/bin/bash')
         of.write('\n\n')
-        for line in outlines:
-            of.write(f'echo "Cropping and clipping tile {line[2]}".\n\n')
-            of.write(line[0])
-            of.write('\n\n')
-            of.write(line[1])
+        
+        for command in commands:
+            of.write(command)
             of.write('\n\n')
         
 if __name__ == "__main__":
-    prep(sys.argv[1], sys.argv[2], sys.argv[3])
+    commands = create_pdal_commands(sys.argv[1], sys.argv[2])
+    write_bash_script(commands, sys.argv[3])
