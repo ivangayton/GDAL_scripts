@@ -49,8 +49,16 @@ We also assume that you have many features (buildings, vegetation, etc) covering
 On to the next step.
 
 ### Create the script to process the files.
+We're doing something weird; using Python to write a Bash script. I know, I know, we could just call PDAL directly from Python. The advantage of this process is that the Bash script is editable, which makes it easier to multithread it, stop and restart it, and otherwise troubleshoot in mid-stream. If you don't like it, do please create a better system!
 
-  
+- In a Unix terminal with PDAL installed (lots of instructions on the Net to do this) navigate to the directory where your prepared files are.
+- Invoke the script in this very repo using ```python create_split_merge_pdal_crop_and_clip_command.py lasfile.laz csvfile.csv script_for_this_block.sh```. That'll create a Bash script for you (you can read it if you're curious).
+- Make the script executable with ```sudo chmod +x script_for_this_block.sh```.
+- Run it with ```./script_for_this_block.sh```. If all goes well, that'll start by creating a new version of the original point cloud file that's been filtered for outliers, classified using the SMRF filter, and all points that those algorithms don't think are ground are tossed out. Then it'll clip that into little bitty peices (in the clipped directory) and crop them using the mask files (into the cropped directory).
+- When it finishes, select _all of the files in the cropped directory_. In your terminal, type ```pdal merge ```, drop the huge file list in, and finish the incantation with ```mypointcloud_clipped_and_re-merged.laz``` or whatever you want to call it.
+- You probably want to rasterize it later, there's a PDAL incantation for that in the notes section.
+
+
 ## Notes
 
 - Regenerated the DSM directly from PDAL. This could be useful because it should be possible to combine all of the point clouds into one giant point cloud, which will get rid of any seams along merge cutlines.
@@ -93,4 +101,16 @@ pdal translate odm_georeferenced_model_block_0004.laz -o block_0004_pre-classifi
 ```
 pdal translate $clippedfile -o "clipped/$square.laz" overlay range --filters.overlay.datasource='/home/ivan/Documents/Maps/River_mapping/point_clouds/split_mask/fid_1401.gpkg' --filters.overlay.column="CLS" --filters.overlay.dimension="Classification" --filters.range.limits="Classification[0:5]" --verbose 4
 ```
+
+# Overall Steps
+- Take the point cloud for each individual block from the photogrammetry software and classify it using the PDAL Outlier and Simple Morphological Filter tools.
+  - Settings for the Outlier filter: ```--filters.outlier.method="statistical" --filters.outlier.mean_k=8 --filters.outlier.multiplier=3.0``` 
+- Check the resulting point cloud in CloudCompare to see if the classification makes sense (mostly to make sure that anything that is ground doesn't get classified as non-ground).
+- Filter out all points not classified as ground (only keep points classified by the SMRF as 2&mdash;ground). 
+- Clip the point cloud with the PDAL Overlay filter using the OSM buildings with a 1.2m buffer. This step appears necessary because many areas with low, tightly-packed buildings fool the SMRF filter into thinking the rooftops are the ground.
+- Clip off the edges. Where the point clouds overlap, choose a cutline for each point cloud that overlaps a few meters with the neighboring one.
+- Merge the point clouds with PDAL merge.
+- Rasterize the point clouds to a 12cm GeoTIFF file.
+- Import the resulting GeoTiff file into QGIS. It's more holes than points, because outside of the actual river valley there's more rooftop area than ground area visible from the sky. At the edges of the holes, there's often a raised lip due to a few points from the buildings that snuck in (whether they were classified by the SMRF or masked out). Clip those in the raster so that the ground edges don't have raised borders.
+- Use the QGIS "Fill nodata" tool to place a naive slab of interpolated pixels over the top of the holes.
 

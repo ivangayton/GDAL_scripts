@@ -71,8 +71,13 @@ def create_pdal_commands(lasfile, csvfile):
         xmax = tile[3]
         ymin = tile[4]
         commands.append(f'echo Cropping and clipping tile {tilenum}.')
-        commands.append(f'pdal translate {classifiedlasfile} -o {croppedfile} crop --filters.crop.bounds="([{xmin},{xmax}],[{ymin},{ymax}])" --writers.las.compression=true --verbose 4')
-        commands.append(f'pdal translate {croppedfile} -o {clippedfile} overlay range --filters.overlay.datasource={maskfile} --filters.overlay.column="CLS" --filters.overlay.dimension="Classification" --filters.range.limits="Classification[2:2]" --verbose 4')
+        if os.path.isfile(maskfile):
+            commands.append(f'pdal translate {classifiedlasfile} -o {croppedfile} crop --filters.crop.bounds="([{xmin},{xmax}],[{ymin},{ymax}])" --writers.las.compression=true --verbose 4')
+            commands.append(f'pdal translate {croppedfile} -o {clippedfile} overlay range --filters.overlay.datasource={maskfile} --filters.overlay.column="CLS" --filters.overlay.dimension="Classification" --filters.range.limits="Classification[2:2]" --verbose 4')
+        else:
+            commands.append(f'{maskfile} not present. '
+                           'Putting cropped result in clipped directory')
+            commands.append(f'pdal translate {classifiedlasfile} -o {clippedfile} crop --filters.crop.bounds="([{xmin},{xmax}],[{ymin},{ymax}])" --writers.las.compression=true --verbose 4')
 
     return commands
 
