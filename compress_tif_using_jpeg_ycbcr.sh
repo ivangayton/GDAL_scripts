@@ -34,4 +34,4 @@ gdaladdo -r average --config BIGTIFF_OVERVIEW=IF_SAFER INFILE.tif 2 4 8 16 32 64
 
 # Single-band rasters with data like elevation:
 
-gdal_translate -co COMPRESS=LZW infile.tif outfile.tif
+gdal_translate -co COMPRESS=LZW -co TILED=YES infile.tif outfile.tif
