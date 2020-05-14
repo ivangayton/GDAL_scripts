@@ -114,3 +114,15 @@ pdal translate $clippedfile -o "clipped/$square.laz" overlay range --filters.ove
 - Import the resulting GeoTiff file into QGIS. It's more holes than points, because outside of the actual river valley there's more rooftop area than ground area visible from the sky. At the edges of the holes, there's often a raised lip due to a few points from the buildings that snuck in (whether they were classified by the SMRF or masked out). Clip those in the raster so that the ground edges don't have raised borders.
 - Use the QGIS "Fill nodata" tool to place a naive slab of interpolated pixels over the top of the holes.
   - The GDAL command for this is ```gdal_fillnodata.py -md 100 -b 1 -of GTiff infile.tif outfile.tif``` where ```-md``` is the number of pixels to reach out.
+
+### Vertical coordinates to local Mean Sea Level
+
+The vertical coordinates will probably be GPS coordinates from the drone GPS or the Ground Control Points. This means they are referenced to a spheroid or geoid rather than to the local mean sea level; the ocean won't be at zero. In Dar es Salaam this amounts to about 27.7 meters difference (a sea level point's GPS elevation is about -27.7m). Since the difference between the GPS height and local lea level is different everywhere, you have to use a conversion from a raster. Fortunately there's the Earth Gravitational Model (EGM2008) [published by OSGEO that you can download](https://download.osgeo.org/proj/vdatum/egm08_25/). Grab that, stick it in your /usr/share/proj/ directory, and your GDAL will now have the capacity to transform vertical data to the local mean sea level (to the extent that the EGM raster is correct, which is going to be as good as anything else you can do).
+
+You use gdalwarp to do the transform, and you have to specify the input and output reference systems. In this example we're going from UTM zone 37 South (EPSG:32737) with the WGS84 elevation (EPSG:4979) to the same horizontal CRS (UTM 37S) with the EGM2008 elevation (EPSG:3855).
+
+Here's the command:
+```
+gdalwarp -s_srs EPSG:32737+4979 -t_srs EPSG:32737+3855 infile.tif  outfile_EGM2008.tif
+``
+
