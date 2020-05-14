@@ -113,4 +113,4 @@ pdal translate $clippedfile -o "clipped/$square.laz" overlay range --filters.ove
 - Rasterize the point clouds to a 12cm GeoTIFF file.
 - Import the resulting GeoTiff file into QGIS. It's more holes than points, because outside of the actual river valley there's more rooftop area than ground area visible from the sky. At the edges of the holes, there's often a raised lip due to a few points from the buildings that snuck in (whether they were classified by the SMRF or masked out). Clip those in the raster so that the ground edges don't have raised borders.
 - Use the QGIS "Fill nodata" tool to place a naive slab of interpolated pixels over the top of the holes.
-
+  - The GDAL command for this is ```gdal_fillnodata.py -md 100 -b 1 -of GTiff infile.tif outfile.tif``` where ```-md``` is the number of pixels to reach out.
