@@ -125,4 +125,15 @@ Here's the command:
 ```
 gdalwarp -s_srs EPSG:32737+4979 -t_srs EPSG:32737+3855 infile.tif  outfile_EGM2008.tif
 ``
+### Combining rasters
+
+Combining two rasters with different resolutions is problematic. The ```gdal_merge.py``` utility seems to have trouble with nodata values. The ```gdalwarp``` tool does better.
+
+```
+gdalwarp infile.tif infile2.tif outfilewarpmerged.tif
+```
+
+This seems to retain the resolution of the higher-resolution of the two rasters (whereas ```gdal_merge.py``` keeps the resolution of the first file).
+
+To avoid abrupt seams, you can clip the rasters so that there's a few pixels worth of empty space between them, then use our old friend ```fill_nodata``` to bridge them. This gives a nice smooth transition between the rasters.
 
