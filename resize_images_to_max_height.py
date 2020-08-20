@@ -18,8 +18,8 @@ def main(indir, maxheight, output_dir = None):
         print(image_file)
         (image_filename, image_ext) = os.path.splitext(image_file)
         basename = os.path.basename(image_file)
-        print(output_dir)
-        print(basename)
+        print('Output directory: {}'.format(output_dir))
+        print('basename: {}'.format(basename))
         outpath = os.path.join(output_dir, basename)
         print(outpath)
         try:
