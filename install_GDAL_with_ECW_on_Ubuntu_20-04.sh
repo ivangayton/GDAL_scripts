@@ -1,5 +1,5 @@
 
-
+wget https://github.com/OSGeo/gdal/releases/download/v3.2.2/gdal-3.2.2.tar.gz
 tar -xvf gdal-3.2.2.tar.gz
 
 ./ECWJP2SDKSetup_5.5.0.2034.bin
