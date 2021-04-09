@@ -1,3 +1,5 @@
+## Mostly from https://www.reddit.com/r/QGIS/comments/icw98f/problem_loading_ecw_file_in_ubuntu_linux/
+
 
 wget https://github.com/OSGeo/gdal/releases/download/v3.2.2/gdal-3.2.2.tar.gz
 tar -xvf gdal-3.2.2.tar.gz
