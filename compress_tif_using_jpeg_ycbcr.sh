@@ -26,7 +26,7 @@ gdaladdo -r average INFILE.tif 2 4 8 16 32 64 128 256 512 1024
 
 # If you're working with large rasters, there's always the risk of overflowing the GeoTiff format limit. If you're worried about this, you can specify the use of BigTIFF format that allow substantially larger file/area sizes (disadvantage: some older programs might not be able to read them). So like this:
 
-gdal_translate -co COMPRESS=JPEG -co PHOTOMETRIC=YCBCR -co TILED=YES -b 1 -b 2 -b 3 -mask 4 --config GDAL_TIFF_INTERNAL_MASK YES --co BIGTIFF=IF_SAFER INFILE.tif OUTFILE.tif
+gdal_translate -co COMPRESS=JPEG -co PHOTOMETRIC=YCBCR -co TILED=YES -b 1 -b 2 -b 3 -mask 4 --config GDAL_TIFF_INTERNAL_MASK YES -co BIGTIFF=IF_SAFER INFILE.tif OUTFILE.tif
 
 # and
 
