@@ -42,3 +42,8 @@ for i in *.mbtiles; do
 done
 wait
 cd ../
+
+# An incantation to cut a large raster by cutline (requires a polygon file
+# as the actual cutline
+
+# gdalwarp -overwrite -of GTiff -cutline cutline.gpkg -cl Clip_lines_for_orthos -crop_to_cutline -multi -co BIGTIFF=IF_SAFER infile.tif outfile.tif
