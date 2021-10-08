@@ -42,7 +42,13 @@ Right, let's assume that the neighboring DEMs are accurate (in this case they pr
 First, draw a rough perimeter around the bloc, making sure it's well inside of any funky edge artifacts; we do _not_ want to warp the better-quality interior of our DEM to force the dodgy edges to meet the neighbors! We'll use that as a guide to place our tie points (and we're gonna trim the edges later anyway).
 ![](images/rough_perimeter.jpg)
 
-Now let's create a set of tie points. Guidelines:
+Actually it's a good idea to use the GRASS tool ```r.mask.vect``` to trim your raster using that perimeter right now. That takes time, so maybe go do something else for a while! (Also, do make sure that the perimeter is in the same Coordinate Reference System as the raster). 
+
+Now let's create a set of tie points.
+
+![](images/create_point_layer.jpg)
+
+Guidelines:
 - Keep all of the others near the perimeter so that they'll fall within the high-quality areas of the neighbors.
 - Don't forget to include tie points _exactly_ a the location of any GCPs or other good references.
 - Try to put them in places where the DEMs are likely consistent between one another without big jumps (i.e. aim for fields, roads, etc, _not_ buildings, vegetation, or other bumpy stuff). We sometimes use the ortho photos as a guide to promising tie point locations.
@@ -55,3 +61,10 @@ Then use the QGIS ```Raster analysis``` -> ```Sample raster values``` to get the
 Now do the same for the neighboring rasters. Again set the ```Output column prefix``` to reflect the name of the rasters you're sampling, to ensure you know which value to use as a reference and which to correct. 
 
 ![](images/neighbor_samples.jpg)
+
+Use the ```Vector``` -> ```Geoprocessing tools``` -> ```Buffer``` to create tiny polygons (we use 1m diameter) from the neighbor samples (this allows us to join the two layers, there's no obvious way to join fields from two point layers even if the points are essentially identical, but it's easy to join fields from polygons that points fall within). Then use ```Vector``` -> ```Data management tools``` -> ```Join attributes by location``` with the DEM samples as the base layer and the buffered polygons of the neighbor samples as the join layer. That gives us a new point layer with both elevations. Use the Field Calculator to give the difference.
+
+Note that we failed to correctly name the field of my neighbor elevations; fortunately we did so with the DEM we're referencing so we got away with it.
+
+![](images/correction_at_tie_points.jpg)
+
