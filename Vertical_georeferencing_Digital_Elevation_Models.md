@@ -68,3 +68,11 @@ Note that we failed to correctly name the field of my neighbor elevations; fortu
 
 ![](images/correction_at_tie_points.jpg)
 
+## NEXT STEPS TO DESCRIBE
+I rushed through this without documenting; will get to it later.
+
+- Duplicate the correction layer and drag the points outside of the perimeter so that it will form a convext hull that fully encloses the DEM.
+- Make a TIN out of it, with large cell size, the DEM as reference layer for CRS etc, and cubic, not linear.
+- Add the TIN to the DEM with the Raster Calculator.
+- Check out the resulting raster, which should match nicely everywhere.
+- If so, export it, drag it into Grass, and r.patch.smooth it with a 1-degree slope.
