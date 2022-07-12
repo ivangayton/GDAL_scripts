@@ -11,8 +11,7 @@ def process(infile, input_corners, outfile, crs, comp):
     """
     cp = crs_parameters(crs)
     epsg = cp['EPSG_ID']
-    (ulx, uly, lrx, lry) = get_corners(infile,
-                                       input_corners, cp)
+    (ulx, uly, lrx, lry) = get_corners(input_corners, cp)
     
     compress = ''
     if comp:
@@ -36,7 +35,7 @@ def process(infile, input_corners, outfile, crs, comp):
     
     os.system(cmd_str)
 
-def get_corners(infile, ic, cp):
+def get_corners(ic, cp):
     """
     Parses a text file giving the coordinates of the 
     upper left and lower right corners of a raster.
