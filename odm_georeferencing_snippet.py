@@ -9,25 +9,11 @@ def process(infile, input_corners, outfile, crs, comp):
     Constructs and runs a GDAL command to 
     georeference an ODM orthphoto.
     """
-
     cp = crs_parameters(crs)
-    ulx = uly = lrx = lry = 0.0
-    with open(input_corners) as f:
-        for lineNumber, line in enumerate(f):
-            if lineNumber == 0:
-                tokens = line.split(' ')
-                if len(tokens) == 4:
-                    ulx = float(tokens[0]) + \
-                        float(cp['east_offset'])
-                    lry = float(tokens[1]) + \
-                        float(cp['north_offset'])
-                    lrx = float(tokens[2]) + \
-                        float(cp['east_offset'])
-                    uly = float(tokens[3]) + \
-                        float(cp['north_offset'])
-
     epsg = cp['EPSG_ID']
-
+    (ulx, uly, lrx, lry) = get_corners(infile,
+                                       input_corners, cp)
+    
     compress = ''
     if comp:
         compress = (f'-co COMPRESS=JPEG '
@@ -45,9 +31,36 @@ def process(infile, input_corners, outfile, crs, comp):
                f'-co BIGTIFF=IF_SAFER '
                f'"{infile}" "{outfile}"')
     
-    print(f'Trying to create a GeoTIFF with the command:\n\n{cmd_str}\n') 
+    print(f'Trying to create a GeoTIFF with the ' \
+          f'command:\n\n{cmd_str}\n')
+    
     os.system(cmd_str)
 
+def get_corners(infile, ic, cp):
+    """
+    Parses a text file giving the coordinates of the 
+    upper left and lower right corners of a raster.
+    Returns a tuple of four coordinates,
+    upper left x and y (ulx and uly)
+    lower right x and y (lrx and lry)
+    Adjusted with the offsets from the CRS 
+    (nominally the false easting and northing for UTM).
+    """
+    ulx = uly = lrx = lry = 0.0
+    with open(ic) as f:
+        for lineNumber, line in enumerate(f):
+            if lineNumber == 0:
+                tokens = line.split(' ')
+                if len(tokens) == 4:
+                    ulx = float(tokens[0]) + \
+                        float(cp['east_offset'])
+                    lry = float(tokens[1]) + \
+                        float(cp['north_offset'])
+                    lrx = float(tokens[2]) + \
+                        float(cp['east_offset'])
+                    uly = float(tokens[3]) + \
+                        float(cp['north_offset'])
+    return(ulx, uly, lrx, lry)
 
 def crs_parameters(epsg_string):
     """
@@ -61,7 +74,7 @@ def crs_parameters(epsg_string):
     be simpler, but since different CRSs have different
     types and numbers of keys and values, a dict is
     probably sensible.
-    For now shamelessly hard-coded to 
+    For now shamelessly and ridiculously hard-coded to 
     32736 (UTM zone 36 South with WGS84 datum)
     """
     print(f'\nPretending to produce relevant ' \
@@ -86,9 +99,7 @@ if __name__ == '__main__':
     p.add_argument('-c', '--compress', action='store_true',
                    help='Choose to compress using YCbCr jpeg')
 
-
     args = p.parse_args()
-    
     process(args.input_tiff,
             args.input_corners,
             args.output_tiff,
