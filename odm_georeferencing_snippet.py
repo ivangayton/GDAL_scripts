@@ -4,7 +4,7 @@
 import argparse
 import sys, os
 
-def process(infile, input_corners, outfile, crs):
+def process(infile, input_corners, outfile, crs, comp):
     """
     Constructs and runs a GDAL command to 
     georeference an ODM orthphoto.
@@ -28,11 +28,21 @@ def process(infile, input_corners, outfile, crs):
 
     epsg = cp['EPSG_ID']
 
+    compress = ''
+    if comp:
+        compress = (f'-co COMPRESS=JPEG '
+                    f'-co PHOTOMETRIC=YCBCR '
+                    f'-b 1 -b 2 -b 3 -mask 4 '
+                    f'--config GDAL_TIFF_INTERNAL_MASK YES ')
+
     cmd_str = (f'gdal_translate '
                f'-a_srs {epsg} '
                f'-a_ullr {ulx} {uly} {lrx} {lry} '
                #f'--config GDAL_CACHEMAX {max_memory}% '
                f'--config GDAL_TIFF_INTERNAL_MASK YES '
+               f'{compress}'
+               f'-co TILED=YES '
+               f'-co BIGTIFF=IF_SAFER '
                f'"{infile}" "{outfile}"')
     
     print(f'Trying to create a GeoTIFF with the command:\n\n{cmd_str}\n') 
@@ -54,24 +64,33 @@ def crs_parameters(epsg_string):
     For now shamelessly hard-coded to 
     32736 (UTM zone 36 South with WGS84 datum)
     """
-    print(f'\nPretending to produce relevant CRS data from {epsg_string}')
+    print(f'\nPretending to produce relevant ' \
+          f'CRS data from {epsg_string}\n')
     return{'EPSG_ID': 'EPSG:32736',
            'east_offset': 500000,
            'north_offset': 10000000}
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input_tiff",
-                        help='GeoTIFF raster to be georeferenced')
-    parser.add_argument("input_corners",
-                        help='Text file defining the corners of the raster')
-    parser.add_argument("output_tiff",
-                        help='Output filename')
-    parser.add_argument('-c', '--crs',
-                        help='The appropriate coordinate reference system')
-    args = parser.parse_args()
+    p = argparse.ArgumentParser()
+    # Positional arguments
+    p.add_argument("input_tiff",
+                   help='GeoTIFF raster to be georeferenced')
+    p.add_argument("input_corners",
+                   help='Text file defining the corners of the raster')
+    p.add_argument("output_tiff",
+                   help='Output filename')
+
+    # Flag arguments
+    p.add_argument('-crs', '--coordinate_reference_system',
+                   help='The coordinate reference system')
+    p.add_argument('-c', '--compress', action='store_true',
+                   help='Choose to compress using YCbCr jpeg')
+
+
+    args = p.parse_args()
     
     process(args.input_tiff,
             args.input_corners,
             args.output_tiff,
-            args.crs)
+            args.coordinate_reference_system,
+            args.compress)
