@@ -34,6 +34,8 @@ Here is a DEM bloc that's globally too low (in this case it's actually due to a 
 
 Note that there's a GCP inside the DEM bloc! Lucky us. Ok, let's lift the whole thing so that the elevation at the exact location of the GCP matches the GCP (which is in WGS84, the native GNSS Coordinate Reference System, which is a whole different set of problems but that's a topic for another markdown file). We use the ```Identify features``` tool in QGIS to find the raster elevation by clicking on that exact point whilst the DEM is selected (the elevation shows up on the right in the ```Identify Results``` window. Use simple addition (and/or subtraction if applicable) to raise or lower the entire raster until it matches the GCP elevation at that point.
 
+Note: if tempted to skip this step, assuming that the next step will take care of the lift as well as the tilt/warp, _don't_; it can cause the cubic TIN interpolation to distort.
+
 ![Raster calculator popup](images/raster_calculator_lift.jpg)
 
 Well, ok, now it matches the GCP, but it's clearly tilted! It's too high (orange) on the right, and too low (blue) on the left (here we have the QGIS display style set identically for all of the DEM blocs, so a visible discontinuity corresponds to an actual discontinuity in the data).
@@ -50,11 +52,13 @@ Now, from within QGIS, use the GRASS tool ```r.mask.vect``` to trim your raster 
 
 Now let's create a set of tie points.
 
+**Update**: in some cases we can extract the vertices (```Vector``` -> ```Geometry tools``` -> ```Extract vertices```) of the perimeter as tie points, _provided that_ they fall in sensible spots for tie points (see guidelines below), and of course with the addition of any internal tie points. 
+
 ![](images/create_point_layer.jpg)
 
 Guidelines:
 - Keep all of the others near the perimeter so that they'll fall within the high-quality areas of the neighbors.
-- Don't forget to include tie points _exactly_ a the location of any GCPs or other good references.
+- Don't forget to include tie points _exactly_ at the location of any GCPs or other good references.
 - Try to put them in places where the DEMs are likely consistent between one another without big jumps (i.e. aim for fields, roads, etc, _not_ buildings, vegetation, or other bumpy stuff). We sometimes use the ortho photos as a guide to promising tie point locations.
 - Try to make the tie points dense where there are obvious changes in the mismatch between the DEM and its neighbors.
 
