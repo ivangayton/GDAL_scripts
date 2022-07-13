@@ -64,23 +64,15 @@ def get_corners(ic, cp):
 def crs_parameters(epsg_string):
     """
     Eventually should be able to ingest a Proj string,
-    EPSG ID, or any geographical file with a CRS in it.
-    Returns the appropriate ID string, as well as
-    (for UTM) the false easting and northing (offsets)
-    which are required to correct the georeferencing
-    coordinates.
-    Returns a dictionary. A tuple would
-    be simpler, but since different CRSs have different
-    types and numbers of keys and values, a dict is
-    probably sensible.
-    For now shamelessly and ridiculously hard-coded to 
+    EPSG ID, or any geographical file with a CRS in it.   For now shamelessly and ridiculously hard-coded to
     32736 (UTM zone 36 South with WGS84 datum)
+    with a dataset-specific offset (DANGER)
     """
     print(f'\nPretending to produce relevant ' \
           f'CRS data from {epsg_string}\n')
     return{'EPSG_ID': 'EPSG:32736',
-           'east_offset': 500000,
-           'north_offset': 10000000}
+           'east_offset': 412520,
+           'north_offset': 9674318}
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser()
