@@ -4,14 +4,15 @@
 import argparse
 import sys, os
 
-def process(infile, input_corners, outfile, crs, comp):
+def process(infile, input_corners, outfile,
+            crs, eoff, noff, comp, edit):
     """
     Constructs and runs a GDAL command to 
     georeference an ODM orthphoto.
     """
-    cp = crs_parameters(crs)
-    epsg = cp['EPSG_ID']
-    (ulx, uly, lrx, lry) = get_corners(input_corners, cp)
+
+    (ulx, uly, lrx, lry) = get_corners(input_corners,
+                                       eoff, noff)
     
     compress = ''
     if comp:
@@ -21,7 +22,7 @@ def process(infile, input_corners, outfile, crs, comp):
                     f'--config GDAL_TIFF_INTERNAL_MASK YES ')
 
     cmd_str = (f'gdal_translate '
-               f'-a_srs {epsg} '
+               f'-a_srs {crs} '
                f'-a_ullr {ulx} {uly} {lrx} {lry} '
                #f'--config GDAL_CACHEMAX {max_memory}% '
                f'--config GDAL_TIFF_INTERNAL_MASK YES '
@@ -35,7 +36,7 @@ def process(infile, input_corners, outfile, crs, comp):
     
     os.system(cmd_str)
 
-def get_corners(ic, cp):
+def get_corners(ic, eoff, noff):
     """
     Parses a text file giving the coordinates of the 
     upper left and lower right corners of a raster.
@@ -51,28 +52,23 @@ def get_corners(ic, cp):
             if lineNumber == 0:
                 tokens = line.split(' ')
                 if len(tokens) == 4:
-                    ulx = float(tokens[0]) + \
-                        float(cp['east_offset'])
-                    lry = float(tokens[1]) + \
-                        float(cp['north_offset'])
-                    lrx = float(tokens[2]) + \
-                        float(cp['east_offset'])
-                    uly = float(tokens[3]) + \
-                        float(cp['north_offset'])
+                    ulx = (0 + #float(tokens[0]) + \
+                           float(eoff))
+                    lry = (0 + #float(tokens[1]) + \
+                           float(noff))
+                    lrx = (0 + #float(tokens[2]) + \
+                           float(eoff))
+                    uly = (0 + #float(tokens[3]) + \
+                           float(noff))
     return(ulx, uly, lrx, lry)
 
 def crs_parameters(epsg_string):
     """
     Eventually should be able to ingest a Proj string,
-    EPSG ID, or any geographical file with a CRS in it.   For now shamelessly and ridiculously hard-coded to
-    32736 (UTM zone 36 South with WGS84 datum)
-    with a dataset-specific offset (DANGER)
+    EPSG ID, or any geographical file with a CRS in it
+    and return
     """
-    print(f'\nPretending to produce relevant ' \
-          f'CRS data from {epsg_string}\n')
-    return{'EPSG_ID': 'EPSG:32736',
-           'east_offset': 412520,
-           'north_offset': 9674318}
+    pass
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser()
@@ -87,12 +83,21 @@ if __name__ == '__main__':
     # Flag arguments
     p.add_argument('-crs', '--coordinate_reference_system',
                    help='The coordinate reference system')
+    p.add_argument('-eo', '--east_offset', default=0,
+                   help='The east offset')
+    p.add_argument('-no', '--north_offset', default=0,
+                   help='The north offset'),
     p.add_argument('-c', '--compress', action='store_true',
                    help='Choose to compress using YCbCr jpeg')
+    p.add_argument('-e', '--edit', action='store_true',
+                   help='edit infile instead of creating outfile')
 
     args = p.parse_args()
     process(args.input_tiff,
             args.input_corners,
             args.output_tiff,
             args.coordinate_reference_system,
-            args.compress)
+            args.east_offset,
+            args.north_offset,
+            args.compress,
+            args.edit)
