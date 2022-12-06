@@ -97,7 +97,7 @@ def geotag(indir):
                                  [x for x in data_files if
                                   os.path.splitext(x)[1] == '.json']
                                  [0])
-    except exception as e:
+    except Exception as e:
         print(e)
         print(f'\nYour directory structure in {indir} is probably '
               f'not as expected')
