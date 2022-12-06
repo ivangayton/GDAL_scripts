@@ -194,4 +194,4 @@ if __name__ == "__main__":
     else:
         wingtra_dirs = get_wingtra_dirs(indir)
         for d in wingtra_dirs:
-            print(f'{d} is a Wingtra directory')
+            geotag(d)
