@@ -154,8 +154,9 @@ def geotag(indir):
 
     geo_txt_in_images_dir = os.path.join(image_directory, 'geo.txt')
     shutil.copy(geotxt, geo_txt_in_images_dir)    
-    
 
+    print(f'Wrote \n- {outcsv_file},\n- {geotxt}, '
+          f'and \n- {geo_txt_in_images_dir}\n')
     return 0
     
 if __name__ == "__main__":
