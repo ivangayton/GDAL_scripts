@@ -4,6 +4,7 @@
 """
 
 import sys, os
+import shutil
 import csv
 import json
 
@@ -150,6 +151,10 @@ def geotag(indir):
         writer = csv.writer(geotxt_file, delimiter = ' ')
         writer.writerow(['EPSG:4326'])
         writer.writerows(merged_geo)
+
+    geo_txt_in_images_dir = os.path.join(image_directory, 'geo.txt')
+    shutil.copy(geotxt, geo_txt_in_images_dir)    
+    
 
     return 0
     
