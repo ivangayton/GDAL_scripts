@@ -14,6 +14,41 @@ def scandir(dir):
         for f in files:
             filelist.append(f)
     return filelist
+
+def is_wingtra_dir(indir):
+    """Checks if a directory has an IMAGES subdirectory
+    with at least one JPG image file in it,
+    and a DATA subdirectory containing at least one json file
+    which would be consistent with a Wingtra data directory.
+    """
+    
+    dp = os.path.join(indir, 'DATA')
+    ip = os.path.join(indir, 'IMAGES')
+    if os.path.exists(dp) and os.path.exists(ip):
+        all_data_files = os.listdir(dp)
+        flight_log_file = [f for f in all_data_files if
+                           os.path.splitext(f)[1].lower() == '.json']
+        all_image_files = os.listdir(ip)
+        imagefilelist = [f for f in all_image_files if
+                         os.path.splitext(f)[1].lower() == '.jpg']
+        if imagefilelist and flight_log_file:
+            return True
+        else:
+            return False
+    else:
+        return False
+        
+def get_wingtra_dirs(indir):
+    """Find directories containing DATA and IMAGES subdirs"""
+    dirlist = []
+    for path, dirs, files in os.walk(indir):
+        for d in dirs:
+            dirlist.append(os.path.join(path, d))
+    wingtra_dirs = []
+    for d in dirlist:
+        if is_wingtra_dir(d):
+            wingtra_dirs.append(d)
+    return wingtra_dirs
     
 def extract_locations(infile):
     """Return a list of locations and timestamps"""
@@ -43,7 +78,7 @@ def extract_locations(infile):
         
     return (csv,geotxt)       
 
-def geotag(flight_log_file, image_directory):
+def geotag(indir):
     """
     Side effects: writes outfiles
 
@@ -52,11 +87,30 @@ def geotag(flight_log_file, image_directory):
     Create a txt file in the format of an ODM geo.txt
     (though not actually named geo.txt for now).
     """
+    # Grab the json file in the DATA dir
+    # This is illegible and fragile, whatever, suck it up
+    data_dir = os.path.join(indir, 'DATA')
+    data_files = os.listdir(data_dir)
+    flight_log_file = ''
+    try:
+        flight_log_file = os.path.join(data_dir,
+                                 [x for x in data_files if
+                                  os.path.splitext(x)[1] == '.json']
+                                 [0])
+    except exception as e:
+        print(e)
+        print(f'\nYour directory structure in {indir} is probably '
+              f'not as expected')
+                
+    # Grab the images directory
+    image_directory = os.path.join(indir, 'IMAGES')
     (locations,geotxt) = extract_locations(flight_log_file)
 
     #sort by sequence, probably should be timestamp
     locations.sort(key = lambda x: int(x[0]))
-    image_files = scandir(image_directory)
+    all_files = os.listdir(image_directory)
+    image_files = [x for x in all_files if
+                   os.path.splitext(x)[1].lower() == '.jpg']
 
     #alphabetize the fuckers, hope for the best
     image_files.sort() 
@@ -116,6 +170,10 @@ if __name__ == "__main__":
         MyFlight02_01_00003.JPG
         ...
 
+    If the directory does not have that structure, it looks for
+    subdirectories that do and, if it finds them, processes them
+    individually.
+
     So far it looks like the locations and photos sort correctly 
     with naive alphabetization, so when we zip them to join the 
     coordinates to the appropriate images it seems to work, though 
@@ -124,23 +182,10 @@ if __name__ == "__main__":
     """
     indir = sys.argv[1]
 
-    # Grab the json file in the DATA dir
-    # This is illegible and fragile, whatever, suck it up
-    data_dir = os.path.join(indir, 'DATA')
-    data_files = scandir(data_dir)
-    flight_log_file = ''
-    try:
-        flight_log_file = os.path.join(data_dir,
-                                 [x for x in data_files if
-                                  os.path.splitext(x)[1] == '.json']
-                                 [0])
-    except exception as e:
-        print(e)
-        print('\nYour directory structure is probably not as expected')
-        
-    # Grab the images directory
-    image_directory = os.path.join(indir, 'IMAGES')
-
-    result = geotag(flight_log_file, image_directory)
-
-    
+    # Check if the indir is a Wingtra directory
+    if is_wingtra_dir(indir):
+        geotag(indir)
+    else:
+        wingtra_dirs = get_wingtra_dirs(indir)
+        for d in wingtra_dirs:
+            print(f'{d} is a Wingtra directory')
