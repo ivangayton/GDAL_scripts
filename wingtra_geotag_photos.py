@@ -9,7 +9,8 @@ import csv
 import json
 
 def scandir(dir):
-    """Walk recursively through a directory and return a list of all files in it"""
+    """Walk recursively through a directory and 
+    return a list of all files in it"""
     filelist = []
     for path, dirs, files in os.walk(dir):
         for f in files:
