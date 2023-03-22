@@ -43,7 +43,8 @@ def get_odm_dirs(indir):
     odm_dirs = []
     for d in dirlist:
         ortho_dir = os.path.join(d, 'odm_orthophoto')
-        ortho_file = os.path.join(ortho_dir, 'odm_orthophoto.tif')
+        ortho_file = os.path.join(ortho_dir,
+                                  'odm_orthophoto.tif')
         if(os.path.isfile(ortho_file)):
             odm_dirs.append(d)
     return odm_dirs
@@ -55,24 +56,35 @@ def consolidate_orthos(indir):
         print(f'\nCreating {orthos_new_dir}')
         os.makedirs(orthos_new_dir)
     for odm_dir in odm_dirs:
-        original = os.path.join(odm_dir, 'odm_orthophoto', 'odm_orthophoto.tif')
+        original = os.path.join(odm_dir, 'odm_orthophoto',
+                                'odm_orthophoto.tif')
         basename = os.path.split(odm_dir)[-1]
         # ditch the "-all" at the end of ODM output dir names
-        newfilename = f'{basename}.tif'.replace('-all.tif','.tif')
-        copy = os.path.join(orthos_new_dir, newfilename)
-        print(f'Copying {original} to {copy}')
-        shutil.copyfile(original, copy)
-    
+        newfn = f'{basename}.tif'.replace('-all.tif','.tif')
+        copy = os.path.join(orthos_new_dir, newfn)
+        if not os.path.isfile(copy):
+            print(f'Copying {original} to {copy}')
+            shutil.copyfile(original, copy)
+        else:
+            print(f'{copy} already exists! Doing nothing.')
+            
 
 
 if __name__ == '__main__':
-    """Consolidates ODM outputs from multiple directories and projects"""
+    """
+    Consolidates ODM outputs from multiple directories 
+    and projects
+    """
+    
     p = argparse.ArgumentParser()
 
     p.add_argument("indir",
-                   help="Input directory full of ODM output directories")
-    p.add_argument("-dem", "--digital_elevation_model", action="store_true",
-                   help="grabs the dsm and dtm (if present) as well as orthos")
+                   help="Input directory full of ODM "
+                   "output directories")
+    p.add_argument("-dem", "--digital_elevation_model",
+                   action="store_true",
+                   help="grabs the dsm and dtm (if present)"
+                   " as well as orthos")
 
     a = p.parse_args()
 

@@ -5,18 +5,20 @@ Sensefly Ebee camera images. Not sure if it works with other cameras as it's
 currently only set up for the specific numerical format of the EXIF data
 the Ebee camera creates (degrees, minutes, and seconds as a Ratio datatype).
 
-Creates a CSV file containing the file basenames, the paths, and the lats and
-lons in decimal degree format for all images, suitable for importation into 
-QGIS as delimited text.
+Creates a CSV file containing the file basenames, 
+the paths, and the lats and lons in decimal degree 
+format for all images, suitable for importation 
+into QGIS as delimited text.
 
 Expects a single argument: a directory. Recursively traverses all
 subdirectories, so it'll give you a CSV with info from all .jpg images in the
 folder and all subfolders. The CSV file will be in the same parent folder as
 the input directory, and will have the same name with a .csv extension. 
 
-Requires the exifread library, available on pip (pip install exifread). 
-Might be sensible to rewrite using PIL (or pillow) library to make it a more
-common dependency. Not urgent.
+Requires the exifread library, available on pip 
+(pip install exifread). 
+Might be sensible to rewrite using PIL (or pillow) 
+library to make it a more common dependency. Not urgent.
 """
 
 import sys, os
@@ -24,7 +26,10 @@ import csv
 import exifread
 
 def scandir(dir):
-    """Walk recursively through a directory and return a list of all files in it"""
+    """
+    Walk recursively through a directory and return a list 
+    of all files in it and its subdirectories.
+    """
     filelist = []
     for path, dirs, files in os.walk(dir):
         for f in files:
