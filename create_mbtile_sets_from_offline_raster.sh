@@ -26,3 +26,6 @@ done
 
 # In case reprojection needed:
 # gdalwarp -t_srs EPSG:3857 infile.tif outfile_3857.tif
+
+# some clipping stuff
+gdalwarp -overwrite -of GTiff -cutline path/MASK.gpkg -cl MASK -crop_to_cutline -dstnodata 0.0 path/input.vrt path/OUTPUT.tif
