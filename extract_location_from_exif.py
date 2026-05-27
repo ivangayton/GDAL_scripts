@@ -1,9 +1,10 @@
 #! /usr/bin/python3
 """
 Extracts the GPS locations from EXIF data from a directory full of 
-Sensefly Ebee camera images. Not sure if it works with other cameras as it's
+drone camera images. Not sure if it works with other cameras as it's
 currently only set up for the specific numerical format of the EXIF data
-the Ebee camera creates (degrees, minutes, and seconds as a Ratio datatype).
+that DJI and Sensefly drones create (degrees, minutes, and seconds as a
+Ratio datatype).
 
 Creates a CSV file containing the file basenames, 
 the paths, and the lats and lons in decimal degree 
@@ -16,7 +17,7 @@ folder and all subfolders. The CSV file will be in the same parent folder as
 the input directory, and will have the same name with a .csv extension. 
 
 Requires the exifread library, available on pip 
-(pip install exifread). 
+(pip3 install exifread). 
 Might be sensible to rewrite using PIL (or pillow) 
 library to make it a more common dependency. Not urgent.
 """
@@ -79,7 +80,7 @@ def create_geotag_list(indir):
         (image_path, image_ext) = os.path.splitext(image_file)
         image_filename = os.path.basename(image_file)
         image_dirname = os.path.dirname(image_file)
-        if(image_ext == '.JPG' or image_ext == '.jpg'):
+        if(image_ext.lower() == '.jpg' or image_ext.lower() == '.dng'):
             crds = extract_location(image_file)
             if(crds):
                 writer.writerow([image_filename, image_file, image_dirname,
